@@ -33,6 +33,7 @@ export const Internship = () => {
 
   return (
     <div>
+    <div class="container-md">
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -110,6 +111,7 @@ export const Internship = () => {
           </li>
         </ul>
       </nav>
+    </div>
     </div>
   )
 }
