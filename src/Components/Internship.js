@@ -13,69 +13,26 @@ export const Internship = () => {
 
   useEffect(() => {
     getData();
-  },[]);
+  }, []);
 
+  async function getData() {
+    const result = [];
+    const { data } = await axios.get('https://www.breakingbadapi.com/api/characters');
 
-  function getQuotes(url) {
-    // console.log(url);
-    // console.log("getData");
-
-    const promise = axios.get(url)
-
-    // using .then, create a new promise which extracts the data
-    const dataPromise = promise.then((response) => response.data)
-
-    // return it
-    return dataPromise
-
-  }
-
-  function getData() {
-    console.log("getData");
-    axios.get('https://www.breakingbadapi.com/api/characters')
-      .then(function (response) {
-        // handle success
-        // console.log("response.data");
-        // console.log(response.data);
-
-        var bar = new Promise((resolve, reject) => {
-          response.data.forEach((element, index, array) => {
-            // console.log("element")
-            // console.log(element)
-            getQuotes('https://www.breakingbadapi.com/api/quotes/' + element.char_id).then(data => {
-              // console.log("getQuotes")
-              // console.log(data)
-              var quotes = [];
-              data.forEach(ele => {
-                // console.log(ele.quote)
-                quotes.push(ele.quote)
-              });
-              element.quotes = quotes;
-            });
-            if (index === response.data.length -1) resolve();
-            // console.log(response.data);
-          });
+    await Promise.all(data.map(async (ele) => {
+      await axios.get('https://www.breakingbadapi.com/api/quotes/' + ele.char_id)
+        .then(data => {
+          ele.quotes = data.data;
+          result.push(ele);
         });
-        bar.then(() => {
-          console.log("All done");
-          setResult(response.data);
-          setIsLoading(false);
-        });
-        
-    
-      })
-      .catch(function (error) {
-        // handle error
-        console.log(error);
-      })
-      .then(function () {
 
-      });
+    }));
+    setResult(result);
+    setIsLoading(false);
   }
 
   return (
     <div>
-    <div class="container-md">
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -95,7 +52,7 @@ export const Internship = () => {
             (!isLoading) ?
               result.map((data, i) => {
                 console.log("Entered");
-                console.log(data);
+                console.log(data.quotes);
                 // Return the element. Also pass key     
                 return (
                   <tr key={data} answer={data} >
@@ -104,9 +61,11 @@ export const Internship = () => {
                     <td>{data.birthday}</td>
                     <td>
                       <ul>
-                        {data.occupation.map((o, i) => { 
-                          return (<li>{o}</li>)
-                        })}
+                        {
+                          data.occupation?.map((o, i) => {
+                            return (<li>{o}</li>)
+                          })
+                        }
                       </ul>
 
                     </td>
@@ -115,17 +74,19 @@ export const Internship = () => {
                     <td>{data.portrayed}</td>
                     <td>
                       <ul>
-                        {data.appearance.map((o, i) => {
+                        {data.appearance?.map((o, i) => {
                           return (<li>{o}</li>)
                         })}
                       </ul>
                     </td>
                     <td>
-                      {/* <ul>
-                        {data.quotes.map((o, i) => {
-                          return (<li>{o}</li>)
-                        })}
-                      </ul> */}
+                      <ul>
+                        {
+                          data.quotes?.map((o, i) => {
+                            return (<li>{o.quote}</li>)
+                          })
+                        }
+                      </ul>
                     </td>
                   </tr>
                 )
@@ -133,8 +94,6 @@ export const Internship = () => {
               <span></span>
           }
         </tbody>
-
-
       </Table>
 
 
@@ -151,7 +110,6 @@ export const Internship = () => {
           </li>
         </ul>
       </nav>
-      </div>
     </div>
   )
 }
